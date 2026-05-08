@@ -144,7 +144,6 @@
         <div class="pace-input-row">
           <input
             type="text"
-            inputmode="numeric"
             autocomplete="off"
             spellcheck="false"
             class:invalid={paceInvalid[i]}
