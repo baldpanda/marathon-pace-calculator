@@ -1,6 +1,6 @@
 # Spec 0002 — Pace ↔ Time Calculator (MVP)
 
-**Status:** Proposed
+**Status:** Approved
 **Serves:** Manifesto §3 (simplicity first), §4 (pace calculator), §7 (mobile-first, tested, fast)
 
 ## Context
@@ -40,7 +40,7 @@ Canonical examples (rounded display):
 | Input | Output |
 |---|---|
 | pace `4:00` | total `02:48:47` |
-| pace `5:00` | total `03:30:58` |
+| pace `5:00` | total `03:30:59` |
 | total `3:30:00` | pace `4:59` |
 | total `4:00:00` | pace `5:41` |
 
