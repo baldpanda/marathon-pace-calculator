@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ChunkTimeline from './lib/ChunkTimeline.svelte';
   import {
     formatPace,
     formatTime,
@@ -63,6 +64,8 @@
       <span class="unit">hh:mm:ss</span>
     </div>
   </div>
+
+  <ChunkTimeline />
 </main>
 
 <style>
