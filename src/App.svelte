@@ -37,7 +37,6 @@
       <input
         id="pace"
         type="text"
-        inputmode="numeric"
         autocomplete="off"
         spellcheck="false"
         placeholder="4:30"
@@ -54,7 +53,6 @@
       <input
         id="time"
         type="text"
-        inputmode="numeric"
         autocomplete="off"
         spellcheck="false"
         placeholder="3:09:39"
