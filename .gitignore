@@ -216,3 +216,19 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Node / Vite / Svelte
+node_modules/
+dist/
+.svelte-kit/
+.vite/
+*.local
+
+# Test / coverage
+coverage/
+.vitest-cache/
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
