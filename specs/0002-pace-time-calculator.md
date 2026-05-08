@@ -78,9 +78,10 @@ specs/
 
 ## Out of scope
 
-- Per-km splits table — **spec 0003**.
-- Reference splits at 5K / 10K / half / 30K / finish — **spec 0003**.
-- Pacing strategies (even / negative / custom bands) — **spec 0004**.
+- Custom pace bands (per-segment paces) — **spec 0003**.
+- Per-km splits table — later spec.
+- Reference splits at 5K / 10K / half / 30K / finish — later spec.
+- Auto-fill pacing strategies (even / negative second-half speedup) — later spec.
 - URL-shareable inputs, localStorage — re-evaluate after MVP.
 - Imperial units, race-time prediction, GPX, weather — blocked by Manifesto §5.
 - Hosting / deployment — future spec.
