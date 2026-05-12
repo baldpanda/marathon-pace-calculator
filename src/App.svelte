@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ChunkTimeline from './lib/ChunkTimeline.svelte';
+  import SegmentTimeline from './lib/SegmentTimeline.svelte';
   import {
     formatPace,
     formatTime,
@@ -65,7 +65,7 @@
     </div>
   </div>
 
-  <ChunkTimeline />
+  <SegmentTimeline />
 </main>
 
 <style>

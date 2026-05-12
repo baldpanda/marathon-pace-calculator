@@ -1,18 +1,18 @@
 <script lang="ts">
   import {
-    type Chunk,
+    type Segment,
     DEFAULT_PACE_SECONDS_PER_KM,
-    addChunk,
-    chunkTotalSeconds,
-    defaultChunks,
-    removeLastChunk,
+    addSegment,
+    segmentTotalSeconds,
+    defaultSegments,
+    removeLastSegment,
     setBoundary,
-    setChunkPace,
+    setSegmentPace,
     splitMarkers,
-  } from './chunks';
+  } from './segments';
   import { MARATHON_KM, formatPace, formatTime, parsePace } from './pace';
 
-  let chunks = $state<Chunk[]>(defaultChunks());
+  let segments = $state<Segment[]>(defaultSegments());
   let paceInputs = $state<string[]>([formatPace(DEFAULT_PACE_SECONDS_PER_KM)]);
   let paceInvalid = $state<boolean[]>([false]);
   let activeHandle = $state<number | null>(null);
@@ -20,17 +20,17 @@
   let barEl = $state<HTMLDivElement | undefined>();
 
   function reseed() {
-    paceInputs = chunks.map((c) => formatPace(c.paceSecondsPerKm));
-    paceInvalid = chunks.map(() => false);
+    paceInputs = segments.map((c) => formatPace(c.paceSecondsPerKm));
+    paceInvalid = segments.map(() => false);
   }
 
   function onAdd() {
-    chunks = addChunk(chunks);
+    segments = addSegment(segments);
     reseed();
   }
 
   function onRemove() {
-    chunks = removeLastChunk(chunks);
+    segments = removeLastSegment(segments);
     reseed();
   }
 
@@ -46,8 +46,8 @@
     if (rect.width === 0) return;
     const ratio = (event.clientX - rect.left) / rect.width;
     const km = ratio * MARATHON_KM;
-    chunks = setBoundary(chunks, handleIndex, km);
-    paceInputs = chunks.map((c, i) => paceInputs[i] ?? formatPace(c.paceSecondsPerKm));
+    segments = setBoundary(segments, handleIndex, km);
+    paceInputs = segments.map((c, i) => paceInputs[i] ?? formatPace(c.paceSecondsPerKm));
   }
 
   function onHandlePointerUp(event: PointerEvent) {
@@ -67,13 +67,13 @@
       return;
     }
     paceInvalid[index] = false;
-    chunks = setChunkPace(chunks, index, sec);
+    segments = setSegmentPace(segments, index, sec);
   }
 
-  const total = $derived(formatTime(chunkTotalSeconds(chunks)));
-  const markers = $derived(splitMarkers(chunks));
+  const total = $derived(formatTime(segmentTotalSeconds(segments)));
+  const markers = $derived(splitMarkers(segments));
 
-  function chunkStartKm(i: number): number {
+  function segmentStartKm(i: number): number {
     if (i === 0) return 0;
     return markers[i - 1]?.km ?? 0;
   }
@@ -83,9 +83,9 @@
   }
 </script>
 
-<section class="chunks">
+<section class="segments">
   <h2>Pace bands</h2>
-  <p class="muted">Split the marathon into chunks. Drag handles to adjust distances; edit each chunk's pace below.</p>
+  <p class="muted">Split the marathon into segments. Drag handles to adjust distances; edit each segment's pace below.</p>
 
   <div class="total">
     <span class="total-label">Total finish</span>
@@ -93,15 +93,15 @@
   </div>
 
   <div class="controls">
-    <button type="button" onclick={onAdd} aria-label="Add chunk">+ Add chunk</button>
-    <button type="button" onclick={onRemove} disabled={chunks.length <= 1} aria-label="Remove last chunk">− Remove last</button>
+    <button type="button" onclick={onAdd} aria-label="Add segment">+ Add segment</button>
+    <button type="button" onclick={onRemove} disabled={segments.length <= 1} aria-label="Remove last segment">− Remove last</button>
   </div>
 
   <div class="timeline">
     <div class="bar" bind:this={barEl} role="presentation">
-      {#each chunks as chunk, i (i)}
-        <div class="segment" style="width: {pct(chunk.km)}%;">
-          <span class="segment-pace">{formatPace(chunk.paceSecondsPerKm)}</span>
+      {#each segments as segment, i (i)}
+        <div class="segment" style="width: {pct(segment.km)}%;">
+          <span class="segment-pace">{formatPace(segment.paceSecondsPerKm)}</span>
         </div>
       {/each}
 
@@ -135,11 +135,11 @@
   </div>
 
   <ul class="paces">
-    {#each chunks as chunk, i (i)}
+    {#each segments as segment, i (i)}
       <li class="pace-row">
         <span class="pace-label">
-          <strong>Chunk {i + 1}</strong>
-          <span class="pace-range">{chunkStartKm(i).toFixed(2)}–{(markers[i]?.km ?? 0).toFixed(2)} km</span>
+          <strong>Segment {i + 1}</strong>
+          <span class="pace-range">{segmentStartKm(i).toFixed(2)}–{(markers[i]?.km ?? 0).toFixed(2)} km</span>
         </span>
         <div class="pace-input-row">
           <input
@@ -148,9 +148,9 @@
             autocomplete="off"
             spellcheck="false"
             class:invalid={paceInvalid[i]}
-            value={paceInputs[i] ?? formatPace(chunk.paceSecondsPerKm)}
+            value={paceInputs[i] ?? formatPace(segment.paceSecondsPerKm)}
             oninput={(e) => onPaceInput(e, i)}
-            aria-label="Pace for chunk {i + 1}"
+            aria-label="Pace for segment {i + 1}"
           />
           <span class="unit">min/km</span>
         </div>
@@ -160,7 +160,7 @@
 </section>
 
 <style>
-  .chunks {
+  .segments {
     margin-top: 2.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid #2a2f3a;
