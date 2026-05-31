@@ -1,7 +1,7 @@
 # Marathon Pace Calculator — Manifesto
 
 ### 1. Mission
-A minimal, fast, reliable web tool that helps **competitive amateur marathoners** generate trustworthy pace plans for race day. Nothing more.
+A minimal, fast, reliable web tool that helps **competitive amateur road racers preparing for a target marathon** generate trustworthy pace plans for race day — including the tune-up races (5K, 10K, half) along the way. Nothing more.
 
 ### 2. Primary user
 A competitive amateur runner — someone targeting a specific finish time, who cares about splits and pacing strategy, but who is not a coach managing athletes and not a beginner needing hand-holding.
@@ -13,7 +13,7 @@ A competitive amateur runner — someone targeting a specific finish time, who c
 - The default path should require no configuration.
 
 ### 4. In scope (launch)
-- **Pace / split calculator** — given a goal finish time, produce per-km splits over the marathon distance (42.195 km).
+- **Pace / split calculator** — given a goal finish time and a target distance (5 km, 10 km, half marathon, marathon), produce per-km splits over the chosen distance.
 - **Pacing strategies:**
   - Even splits (default)
   - Negative splits (configurable second-half speedup)

@@ -9,8 +9,12 @@ export const DEFAULT_PACE_SECONDS_PER_KM = 300;
 export const SNAP_KM = 0.05;
 export const MIN_SEGMENT_KM = SNAP_KM;
 
-export function defaultSegments(): Segment[] {
-  return [{ km: MARATHON_KM, paceSecondsPerKm: DEFAULT_PACE_SECONDS_PER_KM }];
+export function defaultSegments(distanceKm: number = MARATHON_KM): Segment[] {
+  return [{ km: distanceKm, paceSecondsPerKm: DEFAULT_PACE_SECONDS_PER_KM }];
+}
+
+export function singleSegment(distanceKm: number, paceSecondsPerKm: number): Segment[] {
+  return [{ km: distanceKm, paceSecondsPerKm }];
 }
 
 export function addSegment(segments: Segment[]): Segment[] {

@@ -8,28 +8,52 @@
     parseTime,
     totalSecondsToPace,
   } from './lib/pace';
+  import { DEFAULT_DISTANCE, DISTANCES, type DistanceKey } from './lib/distance';
 
+  let distanceKey = $state<DistanceKey>(DEFAULT_DISTANCE);
   let paceInput = $state('');
   let timeInput = $state('');
+  let lastEdited = $state<'pace' | 'time' | null>(null);
+
+  const distanceKm = $derived(DISTANCES[distanceKey]);
+  const PLACEHOLDER_PACE_SECONDS = 270;
+  const pacePlaceholder = $derived(formatPace(PLACEHOLDER_PACE_SECONDS));
+  const timePlaceholder = $derived(
+    formatTime(paceToTotalSeconds(PLACEHOLDER_PACE_SECONDS, distanceKm)),
+  );
 
   function onPaceInput(event: Event) {
     const value = (event.currentTarget as HTMLInputElement).value;
     paceInput = value;
+    lastEdited = 'pace';
     const secondsPerKm = parsePace(value);
-    timeInput = secondsPerKm === null ? '' : formatTime(paceToTotalSeconds(secondsPerKm));
+    timeInput = secondsPerKm === null ? '' : formatTime(paceToTotalSeconds(secondsPerKm, distanceKm));
   }
 
   function onTimeInput(event: Event) {
     const value = (event.currentTarget as HTMLInputElement).value;
     timeInput = value;
+    lastEdited = 'time';
     const totalSeconds = parseTime(value);
-    paceInput = totalSeconds === null ? '' : formatPace(totalSecondsToPace(totalSeconds));
+    paceInput = totalSeconds === null ? '' : formatPace(totalSecondsToPace(totalSeconds, distanceKm));
+  }
+
+  function onDistanceChange(next: DistanceKey) {
+    distanceKey = next;
+    const nextKm = DISTANCES[next];
+    if (lastEdited === 'time') {
+      const totalSeconds = parseTime(timeInput);
+      paceInput = totalSeconds === null ? '' : formatPace(totalSecondsToPace(totalSeconds, nextKm));
+    } else {
+      const secondsPerKm = parsePace(paceInput);
+      timeInput = secondsPerKm === null ? '' : formatTime(paceToTotalSeconds(secondsPerKm, nextKm));
+    }
   }
 </script>
 
 <main>
   <h1>Marathon Pace Calculator</h1>
-  <p class="muted">Enter pace per km or total time. Distance: 42.195 km.</p>
+  <p class="muted">Enter pace per km or total time. Distance: {distanceKm.toFixed(distanceKm % 1 === 0 ? 0 : 4)} km.</p>
 
   <div class="field">
     <label for="pace">Pace</label>
@@ -39,7 +63,7 @@
         type="text"
         autocomplete="off"
         spellcheck="false"
-        placeholder="4:30"
+        placeholder={pacePlaceholder}
         value={paceInput}
         oninput={onPaceInput}
       />
@@ -55,7 +79,7 @@
         type="text"
         autocomplete="off"
         spellcheck="false"
-        placeholder="3:09:39"
+        placeholder={timePlaceholder}
         value={timeInput}
         oninput={onTimeInput}
       />
@@ -63,7 +87,7 @@
     </div>
   </div>
 
-  <SegmentTimeline />
+  <SegmentTimeline {distanceKey} {onDistanceChange} />
 </main>
 
 <style>

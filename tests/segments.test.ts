@@ -11,6 +11,7 @@ import {
   segmentTotalSeconds,
   setBoundary,
   setSegmentPace,
+  singleSegment,
   splitMarkers,
 } from '../src/lib/segments';
 
@@ -197,6 +198,55 @@ describe('segmentTotalSeconds', () => {
 });
 
 type Marker = { km: number; seconds: number };
+
+describe('multi-distance support (Spec 0004)', () => {
+  it('defaultSegments(distanceKm) returns a single full-distance band at the default pace', () => {
+    for (const km of [5, 10, 21.0975]) {
+      const [only] = defaultSegments(km) as [Segment];
+      expect(only.km).toBe(km);
+      expect(only.paceSecondsPerKm).toBe(DEFAULT_PACE_SECONDS_PER_KM);
+    }
+  });
+
+  it('singleSegment preserves the previous pace at the new distance', () => {
+    const [only] = singleSegment(10, 240) as [Segment];
+    expect(only.km).toBe(10);
+    expect(only.paceSecondsPerKm).toBe(240);
+  });
+
+  it('add/remove preserves the distance invariant at non-marathon distances', () => {
+    for (const km of [5, 10, 21.0975]) {
+      let segments = defaultSegments(km);
+      for (let i = 0; i < 5; i++) {
+        segments = addSegment(segments);
+        expect(sumKm(segments)).toBeCloseTo(km, 10);
+      }
+      while (segments.length > 1) {
+        segments = removeLastSegment(segments);
+        expect(sumKm(segments)).toBeCloseTo(km, 10);
+      }
+    }
+  });
+
+  it('setBoundary clamps to the active distance, not MARATHON_KM', () => {
+    const segments = addSegment(defaultSegments(10));
+    const [a, b] = setBoundary(segments, 0, 9999) as [Segment, Segment];
+    expect(a.km).toBeCloseTo(10 - MIN_SEGMENT_KM, 10);
+    expect(b.km).toBeCloseTo(MIN_SEGMENT_KM, 10);
+    expect(sumKm(setBoundary(segments, 0, 9999))).toBeCloseTo(10, 10);
+  });
+
+  it('segmentTotalSeconds canonical example: 5K at 4:00 = 1200s', () => {
+    expect(segmentTotalSeconds(singleSegment(5, 240))).toBeCloseTo(1200, 9);
+    expect(formatTime(segmentTotalSeconds(singleSegment(5, 240)))).toBe('00:20:00');
+  });
+
+  it('defaultSegments() without args still produces the marathon default', () => {
+    const [only] = defaultSegments() as [Segment];
+    expect(only.km).toBe(MARATHON_KM);
+    expect(only.paceSecondsPerKm).toBe(DEFAULT_PACE_SECONDS_PER_KM);
+  });
+});
 
 describe('splitMarkers', () => {
   it('emits one marker per segment with cumulative km and seconds', () => {

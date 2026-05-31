@@ -8,11 +8,23 @@
     removeLastSegment,
     setBoundary,
     setSegmentPace,
+    singleSegment,
     splitMarkers,
   } from './segments';
-  import { MARATHON_KM, formatPace, formatTime, parsePace } from './pace';
+  import { untrack } from 'svelte';
+  import { formatPace, formatTime, parsePace } from './pace';
+  import { DISTANCES, DISTANCE_KEYS, type DistanceKey } from './distance';
 
-  let segments = $state<Segment[]>(defaultSegments());
+  type Props = {
+    distanceKey: DistanceKey;
+    onDistanceChange: (key: DistanceKey) => void;
+  };
+
+  let { distanceKey, onDistanceChange }: Props = $props();
+
+  const distanceKm = $derived(DISTANCES[distanceKey]);
+
+  let segments = $state<Segment[]>(untrack(() => defaultSegments(DISTANCES[distanceKey])));
   let paceInputs = $state<string[]>([formatPace(DEFAULT_PACE_SECONDS_PER_KM)]);
   let paceInvalid = $state<boolean[]>([false]);
   let activeHandle = $state<number | null>(null);
@@ -34,6 +46,14 @@
     reseed();
   }
 
+  function onDistanceSelect(event: Event) {
+    const next = (event.currentTarget as HTMLSelectElement).value as DistanceKey;
+    const prevPace = segments[0]?.paceSecondsPerKm ?? DEFAULT_PACE_SECONDS_PER_KM;
+    segments = singleSegment(DISTANCES[next], prevPace);
+    reseed();
+    onDistanceChange(next);
+  }
+
   function onHandlePointerDown(event: PointerEvent, handleIndex: number) {
     activeHandle = handleIndex;
     (event.currentTarget as Element).setPointerCapture(event.pointerId);
@@ -45,7 +65,7 @@
     const rect = barEl.getBoundingClientRect();
     if (rect.width === 0) return;
     const ratio = (event.clientX - rect.left) / rect.width;
-    const km = ratio * MARATHON_KM;
+    const km = ratio * distanceKm;
     segments = setBoundary(segments, handleIndex, km);
     paceInputs = segments.map((c, i) => paceInputs[i] ?? formatPace(c.paceSecondsPerKm));
   }
@@ -79,13 +99,23 @@
   }
 
   function pct(km: number): number {
-    return (km / MARATHON_KM) * 100;
+    return (km / distanceKm) * 100;
   }
 </script>
 
 <section class="segments">
-  <h2>Pace bands</h2>
-  <p class="muted">Split the marathon into segments. Drag handles to adjust distances; edit each segment's pace below.</p>
+  <header class="section-header">
+    <h2>Pace bands</h2>
+    <label class="distance-picker">
+      <span class="distance-label">Distance:</span>
+      <select value={distanceKey} onchange={onDistanceSelect} aria-label="Race distance">
+        {#each DISTANCE_KEYS as key (key)}
+          <option value={key}>{key}</option>
+        {/each}
+      </select>
+    </label>
+  </header>
+  <p class="muted">Split the race into segments. Drag handles to adjust distances; edit each segment's pace below.</p>
 
   <div class="total">
     <span class="total-label">Total finish</span>
@@ -164,10 +194,43 @@
     padding-top: 1.5rem;
     border-top: 1px solid #2a2f3a;
   }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0 0 0.5rem;
+    flex-wrap: wrap;
+  }
   h2 {
     font-size: 1.125rem;
-    margin: 0 0 0.5rem;
+    margin: 0;
     letter-spacing: -0.01em;
+  }
+  .distance-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--color-muted);
+  }
+  .distance-label {
+    white-space: nowrap;
+  }
+  .distance-picker select {
+    min-height: 2.5rem;
+    padding: 0.375rem 0.625rem;
+    border: 1px solid #2a2f3a;
+    border-radius: 0.5rem;
+    background: #161a22;
+    color: var(--color-fg);
+    font: inherit;
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .distance-picker select:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
   }
   .muted {
     color: var(--color-muted);

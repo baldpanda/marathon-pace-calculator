@@ -41,10 +41,10 @@ export function formatTime(totalSeconds: number): string {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-export function paceToTotalSeconds(secondsPerKm: number): number {
-  return secondsPerKm * MARATHON_KM;
+export function paceToTotalSeconds(secondsPerKm: number, distanceKm: number = MARATHON_KM): number {
+  return secondsPerKm * distanceKm;
 }
 
-export function totalSecondsToPace(totalSeconds: number): number {
-  return totalSeconds / MARATHON_KM;
+export function totalSecondsToPace(totalSeconds: number, distanceKm: number = MARATHON_KM): number {
+  return totalSeconds / distanceKm;
 }

@@ -123,6 +123,28 @@ describe('canonical examples from spec', () => {
   });
 });
 
+describe('paceToTotalSeconds / totalSecondsToPace at non-marathon distances', () => {
+  it('5K pace 4:00 -> total 00:20:00', () => {
+    expect(formatTime(paceToTotalSeconds(240, 5))).toBe('00:20:00');
+  });
+  it('10K pace 3:45 -> total 00:37:30', () => {
+    expect(formatTime(paceToTotalSeconds(225, 10))).toBe('00:37:30');
+  });
+  it('Half pace 4:30 -> total 01:34:56', () => {
+    expect(formatTime(paceToTotalSeconds(270, 21.0975))).toBe('01:34:56');
+  });
+  it('round-trips through totalSecondsToPace at each distance', () => {
+    for (const km of [5, 10, 21.0975, MARATHON_KM]) {
+      const total = paceToTotalSeconds(285, km);
+      expect(totalSecondsToPace(total, km)).toBeCloseTo(285, 9);
+    }
+  });
+  it('omitting distanceKm preserves the marathon default', () => {
+    expect(paceToTotalSeconds(300)).toBe(paceToTotalSeconds(300, MARATHON_KM));
+    expect(totalSecondsToPace(12658.5)).toBe(totalSecondsToPace(12658.5, MARATHON_KM));
+  });
+});
+
 describe('round-trip', () => {
   it('formatPace(parsePace(x)) === x for canonical paces', () => {
     for (const pace of ['3:30', '4:00', '4:30', '5:00', '6:15', '10:00']) {
