@@ -128,6 +128,17 @@
   </div>
 
   <div class="timeline">
+    <div class="ticks-above">
+      {#each markers as marker, i (i)}
+        {#if i !== markers.length - 1 && i % 2 === 0}
+          <div class="tick tick-above" style="left: {pct(marker.km)}%;">
+            <span class="tick-time">{formatTime(marker.seconds)}</span>
+            <span class="tick-km">{marker.km.toFixed(2)} km</span>
+          </div>
+        {/if}
+      {/each}
+    </div>
+
     <div class="bar" bind:this={barEl} role="presentation">
       {#each segments as segment, i (i)}
         <div class="segment" style="width: {pct(segment.km)}%;">
@@ -150,16 +161,22 @@
       {/each}
     </div>
 
-    <div class="ticks">
+    <div class="ticks-below">
       <div class="tick tick-start" style="left: 0%;">
         <span class="tick-km">0 km</span>
         <span class="tick-time">00:00:00</span>
       </div>
       {#each markers as marker, i (i)}
-        <div class="tick" class:tick-end={i === markers.length - 1} style="left: {pct(marker.km)}%;">
-          <span class="tick-km">{marker.km.toFixed(2)} km</span>
-          <span class="tick-time">{formatTime(marker.seconds)}</span>
-        </div>
+        {#if i === markers.length - 1 || i % 2 !== 0}
+          <div
+            class="tick"
+            class:tick-end={i === markers.length - 1}
+            style="left: {pct(marker.km)}%;"
+          >
+            <span class="tick-km">{marker.km.toFixed(2)} km</span>
+            <span class="tick-time">{formatTime(marker.seconds)}</span>
+          </div>
+        {/if}
       {/each}
     </div>
   </div>
@@ -354,14 +371,23 @@
     box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-accent);
   }
 
-  .ticks {
+  .ticks-above,
+  .ticks-below {
     position: relative;
-    height: 2.75rem;
-    margin-top: 0.5rem;
+    height: 2.25rem;
+  }
+  .ticks-above {
+    margin-bottom: 0.375rem;
+  }
+  .ticks-above:empty {
+    display: none;
+    margin: 0;
+  }
+  .ticks-below {
+    margin-top: 0.375rem;
   }
   .tick {
     position: absolute;
-    top: 0;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
@@ -370,12 +396,25 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
-  .tick::before {
+  .ticks-below .tick {
+    top: 0;
+  }
+  .ticks-above .tick {
+    bottom: 0;
+  }
+  .ticks-below .tick::before {
     content: '';
     width: 1px;
     height: 0.375rem;
     background: var(--color-muted);
     margin-bottom: 0.125rem;
+  }
+  .ticks-above .tick::after {
+    content: '';
+    width: 1px;
+    height: 0.375rem;
+    background: var(--color-muted);
+    margin-top: 0.125rem;
   }
   .tick-km {
     font-size: 0.75rem;
